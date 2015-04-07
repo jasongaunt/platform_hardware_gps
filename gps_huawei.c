@@ -42,7 +42,7 @@
 #define  GPS_DEBUG  0
 
 #if GPS_DEBUG
-#  define  D(...)   LOGD(__VA_ARGS__)
+#  define  D(...)   ALOGD(__VA_ARGS__)
 #else
 #  define  D(...)   ((void)0)
 #endif
@@ -170,7 +170,7 @@ static void dev_power(int state)
     return ; //RvdB
 
     if (property_get("gps.power_on",prop,GPS_POWER_IF) == 0) {
-        LOGE("no gps power interface name");
+        ALOGE("no gps power interface name");
         return;
     }
 
@@ -179,7 +179,7 @@ static void dev_power(int state)
     } while (fd < 0 && errno == EINTR);
 
     if (fd < 0) {
-        LOGE("could not open gps power interface: %s", prop );
+        ALOGE("could not open gps power interface: %s", prop );
         return;
     }
 
@@ -926,7 +926,7 @@ static void nmea_reader_parse( NmeaReader*  r )
         }
         gmtime_r( (time_t*) &r->fix.timestamp, &utc );
         p += snprintf(p, end-p, " time=%s", asctime( &utc ) );
-        LOGE("%s\n",temp);
+        ALOGE("%s\n",temp);
     }
 #endif
 }
@@ -1067,7 +1067,7 @@ static void gps_status_cb( GpsState* state , GpsStatusValue status)
     }
 }
 
-static void gps_set_capabilities_cb( GpsState* state , uint32_t caps)
+static void gps_set_capabilities_cb( GpsState* state, unsigned long caps)
 {
     D("%s()", __FUNCTION__ );
     if (state->callbacks.set_capabilities_cb) {
@@ -1151,13 +1151,13 @@ static void* gps_state_thread( void* arg )
         nevents = epoll_wait( epoll_fd, events, 2, -1 );
         if (nevents < 0) {
             if (errno != EINTR)
-                LOGE("epoll_wait() unexpected error: %s", strerror(errno));
+                ALOGE("epoll_wait() unexpected error: %s", strerror(errno));
             continue;
         }
         D("gps thread received %d events", nevents);
         for (ne = 0; ne < nevents; ne++) {
             if ((events[ne].events & (EPOLLERR|EPOLLHUP)) != 0) {
-                LOGE("EPOLLERR or EPOLLHUP after epoll_wait() !?");
+                ALOGE("EPOLLERR or EPOLLHUP after epoll_wait() !?");
                 goto Exit;
             }
             if ((events[ne].events & EPOLLIN) != 0) {
@@ -1188,7 +1188,7 @@ static void* gps_state_thread( void* arg )
                             state->init = STATE_START;
 
                             if ( pthread_create( &state->tmr_thread, NULL, gps_timer_thread, state ) != 0 ) {
-                                LOGE("could not create gps timer thread: %s", strerror(errno));
+                                ALOGE("could not create gps timer thread: %s", strerror(errno));
                                 started = 0;
                                 state->init = STATE_INIT;
                                 goto Exit;
@@ -1236,7 +1236,7 @@ static void* gps_state_thread( void* arg )
                 }
                 else
                 {
-                    LOGE("epoll_wait() returned unkown fd %d ?", fd);
+                    ALOGE("epoll_wait() returned unkown fd %d ?", fd);
                 }
             }
         }
@@ -1296,7 +1296,7 @@ static int open_serialport( const char* name )
     } while (fd < 0 && errno == EINTR);
 
     if (fd < 0) {
-        LOGE("could not open serial device %s: %s", name, strerror(errno) );
+        ALOGE("could not open serial device %s: %s", name, strerror(errno) );
         return fd;
     }
 
@@ -1394,7 +1394,7 @@ static void gps_state_init( GpsState*  state )
 
     state->fd = open_serialport( gps_data );
     if (state->fd < 0) {
-        LOGE("could not open gps serial device %s: %s", gps_data, strerror(errno) );
+        ALOGE("could not open gps serial device %s: %s", gps_data, strerror(errno) );
         dev_power(0);
         return;
     }
@@ -1413,7 +1413,7 @@ static void gps_state_init( GpsState*  state )
 
     state->ctrl_fd = open_serialport( gps_ctrl );
     if (state->ctrl_fd < 0) {
-        LOGE("could not open gps serial device %s: %s", gps_ctrl, strerror(errno) );
+        ALOGE("could not open gps serial device %s: %s", gps_ctrl, strerror(errno) );
         close(state->fd);
         state->fd = -1;
         dev_power(0);
@@ -1448,13 +1448,13 @@ static void gps_state_init( GpsState*  state )
     serial_write(state->ctrl_fd,"AT^WPDGP\r\n");
 
     if ( socketpair( AF_LOCAL, SOCK_STREAM, 0, state->control ) < 0 ) {
-        LOGE("could not create thread control socket pair: %s", strerror(errno));
+        ALOGE("could not create thread control socket pair: %s", strerror(errno));
         goto Fail;
     }
 
 
     if ( pthread_create( &state->thread, NULL, gps_state_thread, state ) != 0 ) {
-        LOGE("could not create gps thread: %s", strerror(errno));
+        ALOGE("could not create gps thread: %s", strerror(errno));
         goto Fail;
     }
 
@@ -1751,7 +1751,7 @@ static const GpsInterface sGpsInterface = {
 
 static const GpsInterface* gps_get_hardware_interface(struct gps_device_t* dev)
 {
-    LOGV("get_interface was called");
+    ALOGV("get_interface was called");
     return &sGpsInterface;
 }
 
@@ -1775,7 +1775,7 @@ static struct hw_module_methods_t gps_module_methods = {
     .open = open_gps
 };
 
-DLL_PUBLIC const struct hw_module_t HAL_MODULE_INFO_SYM = {
+DLL_PUBLIC struct hw_module_t HAL_MODULE_INFO_SYM = {
     .tag = HARDWARE_MODULE_TAG,
     .version_major = 1,
     .version_minor = 0,
