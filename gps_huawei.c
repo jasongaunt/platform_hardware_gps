@@ -39,8 +39,6 @@
 #include <cutils/properties.h>
 #include <hardware/gps.h>
 
-#define  GPS_DEBUG  0
-
 #if GPS_DEBUG
 #  define  D(...)   ALOGD(__VA_ARGS__)
 #else
