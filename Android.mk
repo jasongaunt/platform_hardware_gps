@@ -9,6 +9,13 @@ include $(CLEAR_VARS)
 LOCAL_SHARED_LIBRARIES := liblog libcutils
 LOCAL_MODULE := gps.default
 LOCAL_MODULE_TAGS := optional
+
+LOCAL_CFLAGS += \
+        -Wno-constant-conversion \
+        -Wno-unused-function \
+        -Wno-unused-parameter \
+        -Wno-unused-variable
+
 LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_SRC_FILES := gps.c
 include $(BUILD_SHARED_LIBRARY)
@@ -17,6 +24,15 @@ include $(CLEAR_VARS)
 LOCAL_SHARED_LIBRARIES := liblog libcutils
 LOCAL_MODULE := gps.huawei
 LOCAL_MODULE_TAGS := optional
+
+LOCAL_CFLAGS += \
+        -Wno-constant-conversion \
+        -Wno-invalid-source-encoding \
+        -Wno-missing-field-initializers \
+        -Wno-unused-function \
+        -Wno-unused-parameter \
+        -Wno-unused-variable
+
 LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_SRC_FILES := gps_huawei.c
 include $(BUILD_SHARED_LIBRARY)
