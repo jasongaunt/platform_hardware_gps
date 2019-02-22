@@ -2,7 +2,7 @@
 **
 ** Copyright 2006, The Android Open Source Project
 ** Copyright 2009, Michael Trimarchi <michael@panicking.kicks-ass.org>
-** Copyright 2011, Eduardo José Tagle <ejtagle@tutopia.com>
+** Copyright 2011, Eduardo JosÃ© Tagle <ejtagle@tutopia.com>
 **
 ** This program is free software; you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free
@@ -138,18 +138,6 @@ static void serial_write(int fd, char *msg)
   return;
 }
 
-static unsigned char calc_nmea_csum(char *msg)
-{
-  unsigned char csum = 0;
-  int i;
-
-  for (i = 1; msg[i] != '*'; ++i) {
-    csum ^= msg[i];
-  }
-
-  return csum;
-}
-
 
 /*****************************************************************/
 /*****************************************************************/
@@ -200,43 +188,6 @@ static void dev_power(int state)
 
     return;
 
-}
-
-static void dev_set_nmea_message_rate(int fd,const char *msg, int rate)
-{
-
-  char buff[50];
-  int i;
-
-  sprintf(buff, "$PUBX,40,%s,%d,%d,%d,0*", msg, rate, rate, rate);
-
-  i = strlen(buff);
-
-  sprintf((buff + i), "%02x\r\n", calc_nmea_csum(buff));
-
-  serial_write(fd, buff);
-
-  D("gps sent to device: %s", buff);
-
-  return;
-
-}
-
-static void dev_set_message_rate(int fd, int rate)
-{
-
-  unsigned int i;
-  static const char *msg[] = {
-                 "GGA", "GLL", "ZDA",
-                 "VTG", "GSA", "GSV",
-                 "RMC"
-                };
-
-  for (i = 0; i < sizeof(msg)/sizeof(msg[0]); ++i) {
-        dev_set_nmea_message_rate(fd, msg[i], rate);
-  }
-
-  return;
 }
 
 
@@ -1014,15 +965,6 @@ static int epoll_register( int  epoll_fd, int  fd )
 }
 
 
-static int epoll_deregister( int  epoll_fd, int  fd )
-{
-    int  ret;
-    do {
-        ret = epoll_ctl( epoll_fd, EPOLL_CTL_DEL, fd, NULL );
-    } while (ret < 0 && errno == EINTR);
-    return ret;
-}
-
 static void gps_nmea_thread_cb( GpsState* state )
 {
     D("%s()", __FUNCTION__ );
@@ -1163,7 +1105,7 @@ static void* gps_state_thread( void* arg )
 
                 if (fd == control_fd)
                 {
-                    char  cmd = 255;
+                    char  cmd = -1;
                     int   ret;
                     D("gps control fd event");
                     do {
@@ -1677,7 +1619,8 @@ static const AGpsInterface  sAGpsInterface = {
     agps_conn_open,
     agps_conn_closed,
     agps_conn_failed,
-    agps_set_server
+    agps_set_server,
+    0
 };
 
 
@@ -1779,6 +1722,6 @@ DLL_PUBLIC struct hw_module_t HAL_MODULE_INFO_SYM = {
     .version_minor = 0,
     .id = GPS_HARDWARE_MODULE_ID,
     .name = "GPS Module",
-    .author = "Eduardo José Tagle",
+    .author = "Eduardo JosÃ© Tagle",
     .methods = &gps_module_methods,
 };

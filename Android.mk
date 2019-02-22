@@ -11,6 +11,7 @@ LOCAL_MODULE := gps.default
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_SRC_FILES := gps.c
+LOCAL_CFLAGS := -Wno-unused-parameter -Wno-unused-variable
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -19,5 +20,6 @@ LOCAL_MODULE := gps.huawei
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_SRC_FILES := gps_huawei.c
+LOCAL_CFLAGS := -Wno-unused-parameter -Wno-unused-variable
 include $(BUILD_SHARED_LIBRARY)
 endif
